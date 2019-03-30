@@ -4,12 +4,16 @@ import sys
 import requests
 
 
-def send_slack_notification():
+def send_slack_notification(color):
+    color_dict = {
+        'good': 'Jupyter is running',
+        'danger': 'Jupyter has stopped'
+    }
     requests.post(SLACK_URL, json={
          "attachments": [
              {
-                 "color": "good",
-                 "text": "Jupyter is running"
+                 "color": color,
+                 "text": color_dict[color]
              }
         ]}
     )
@@ -34,6 +38,14 @@ def main():
         headers = dict([ x.split(':') for x in line.split() ])
 
         data = sys.stdin.read(int(headers['len']))
+
+        data_dict = dict([x.split(':') for x in data.split()])
+
+        if data_dict['processname'] == 'jupyter':
+            if headers['eventname'] == 'PROCESS_STATE_RUNNING' and data_dict['from_state'] == 'STARTING':
+                send_slack_notification('good')
+            if headers['eventname'] == 'PROCESS_STATE_STOPPED' and data_dict['from_state'] == 'STOPPING':
+                send_slack_notification('danger')
         write_stderr('data :' + data + '\n')
         write_stdout('RESULT 2\nOK')
 

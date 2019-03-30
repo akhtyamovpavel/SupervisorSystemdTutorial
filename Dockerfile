@@ -17,6 +17,7 @@ user test
 
 add credentials.py /home/test/credentials.py
 add check_jupyter.py /home/test/check_jupyter.py
+add cron_emulator.py /home/test/cron_emulator.py
 expose 2288
 user root
 cmd supervisord -c /etc/supervisor/supervisord.conf && bash
